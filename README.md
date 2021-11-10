@@ -1,5 +1,5 @@
 # ScriptRunnerScheduling
-Extension classes for ScriptRunner to schedule tasks with on a recurring basis.
+Extension classes to drop in the Script Editor of ScriptRunner to schedule tasks with on a recurring basis.
 
 Use case: every week, on a fixed day, recurring tasks will be created for the next week.
 The recurring tasks can be once a year, once a week, once a day. 
