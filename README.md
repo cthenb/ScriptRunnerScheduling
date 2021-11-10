@@ -6,4 +6,4 @@ The recurring tasks can be once a year, once a week, once a day.
 
 * TaskCreationExamples.groovy contains a few examples, which is what you would put in a ScriptRunner 'job'.
 * DateHelper.groovy contains logic on how to determine whether a task will need to be created next week or not.
-* IssueCreatoinHelper.groovy takes the parameters and creates the actual JIRA task with the type, priority, summary, description, etc.
+* IssueCreationHelper.groovy takes the parameters and creates the actual JIRA task with the type, priority, summary, description, etc.
