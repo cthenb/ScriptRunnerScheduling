@@ -1,5 +1,5 @@
 # ScriptRunnerScheduling
-Extension classes to drop in the Script Editor of ScriptRunner to create tasks on a recurring basis.
+Extension classes for ScriptRunner Script Editor to create recurring tasks in JIRA.
 
 Optionally, you can use the cron setting in ScriptRunner jobs to do the proper scheduling and only use the IssueCreationHelper code to create the actual tasks.
 I found that to be insufficiently flexible in practice.
