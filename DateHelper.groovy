@@ -61,15 +61,21 @@ public class DateHelper
 	public static LocalDate getTaskDateIfTaskNeedsToBeCreated(DayOfWeek start, boolean before, int day)
 	{			
 		LocalDate currentDate = LocalDate.now();
-		LocalDate endOfNextWeek = currentDate.plusDays(9);
+		LocalDate endOfNextWeek = getEndOfNextWeek(currentDate);
         Month currentMonth = currentDate.getMonth();
         Month nextMonth = endOfNextWeek.getMonth();
-		Month[] months = new Month[2];
-        months[0] = currentMonth;
-        months[1] = nextMonth;
         
-		return getTaskDateIfTaskNeedsToBeCreated(start, before, day, months);
-	}
+        if (currentMonth != nextMonth) {
+            Month[] months = new Month[2];
+            months[0] = currentMonth;
+            months[1] = nextMonth;
+
+            return getTaskDateIfTaskNeedsToBeCreated(start, before, day, months);
+        }
+        else {
+            return getTaskDateIfTaskNeedsToBeCreated(start, before, day, currentMonth);
+        }
+    }
 	public static LocalDate getTaskDateIfTaskNeedsToBeCreated(DayOfWeek start, boolean before, int day, Month[] months)
 	{	
 		for (Month month : months) {
@@ -90,12 +96,14 @@ public class DateHelper
         // Only on the specified day to ensure scheduling does not get messed up
         if (currentDate.getDayOfWeek() == start) {
             LocalDate endOfNextWeek = getEndOfNextWeek(currentDate);
+            boolean sameMonth = currentDate.getMonth() == endOfNextWeek.getMonth();
+            boolean dayToCome = day >= currentDate.getDayOfMonth();
+            boolean beforeNextWeek = (sameMonth && dayToCome && day <= endOfNextWeek.getDayOfMonth()) || (!sameMonth && day <= endOfNextWeek.getDayOfMonth());
 
             // Only in the specified month
             if (currentDate.getMonth() == month || endOfNextWeek.getMonth() == month) {
                 // It's at or after today in the current month
-                if (day >= currentDate.getDayOfMonth()
-                    && day <= endOfNextWeek.getDayOfMonth()) {
+                if (dayToCome && beforeNextWeek) {
 					if (before) {
 						workDay = getFirstWorkDayAtOrBeforeDayInMonth(currentDate, day);
 					}
