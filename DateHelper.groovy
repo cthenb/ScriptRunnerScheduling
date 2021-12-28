@@ -93,29 +93,29 @@ public class DateHelper
 		LocalDate currentDate = LocalDate.now();
 		LocalDate workDay = null;
         
-        // Only on the specified day to ensure scheduling does not get messed up
-        if (currentDate.getDayOfWeek() == start) {
-            LocalDate endOfNextWeek = getEndOfNextWeek(currentDate);
-            boolean sameMonth = currentDate.getMonth() == endOfNextWeek.getMonth();
-            boolean dayToCome = day >= currentDate.getDayOfMonth();
-            boolean beforeNextWeek = (sameMonth && dayToCome && day <= endOfNextWeek.getDayOfMonth()) || (!sameMonth && day <= endOfNextWeek.getDayOfMonth());
+		// Only on the specified day to ensure scheduling does not get messed up
+		if (currentDate.getDayOfWeek() == start) {
+		    LocalDate endOfNextWeek = getEndOfNextWeek(currentDate);
+		    boolean sameMonth = currentDate.getMonth() == endOfNextWeek.getMonth();
+		    boolean dayToCome = day >= currentDate.getDayOfMonth();
+		    boolean beforeNextWeek = (sameMonth && dayToCome && day <= endOfNextWeek.getDayOfMonth()) || (!sameMonth && day <= endOfNextWeek.getDayOfMonth());
 
-            // Only in the specified month
-            if (currentDate.getMonth() == month || endOfNextWeek.getMonth() == month) {
-                // It's at or after today in the current month
-                if (dayToCome && beforeNextWeek) {
-					if (before) {
-						workDay = getFirstWorkDayAtOrBeforeDayInMonth(currentDate, day);
+		    // Only in the specified month
+		    if (currentDate.getMonth() == month || endOfNextWeek.getMonth() == month) {
+			// It's at or after today in the current month
+			if (dayToCome && beforeNextWeek) {
+				if (before) {
+					workDay = getFirstWorkDayAtOrBeforeDayInMonth(currentDate, day);
+				}
+				else {				
+					LocalDate toReturn = getFirstWorkDayAtOrAfterDayInMonth(currentDate, day);
+
+					if (toReturn <= endOfNextWeek) {
+						workDay = toReturn;
 					}
-					else {				
-						LocalDate toReturn = getFirstWorkDayAtOrAfterDayInMonth(currentDate, day);
-						
-						if (toReturn <= endOfNextWeek) {
-							workDay = toReturn;
-						}
-					}
-                }
+				}
 			}
+		}
         }
         
         return workDay;
