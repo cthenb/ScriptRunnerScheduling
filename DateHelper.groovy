@@ -135,9 +135,9 @@ public class DateHelper
     		
     public static LocalDate getFirstOccurenceOfDay(int day)
     {
-        int currentDay = LocalDate.now().getDayOfMonth();
+        LocalDate now = LocalDate.now();
 
-        return getFirstOccurenceOfDay(day, currentDay);
+        return getFirstOccurenceOfDay(day, now);
     }
     public static LocalDate getFirstOccurenceOfDay(int day, LocalDate inputDate)
     {
