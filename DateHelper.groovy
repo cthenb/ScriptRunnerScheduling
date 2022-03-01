@@ -2,67 +2,74 @@ import java.time.LocalDate;
 import java.time.DayOfWeek;
 import java.time.YearMonth;
 import java.time.Month;
-import static java.time.temporal.TemporalAdjusters.*;
 
 public class DateHelper
 {
-    // If the day falls on a weekend, return date of first workday after weekend
-    public static LocalDate getFirstWorkDayAtOrAfterDayInMonth(LocalDate currentDate, int dayNumber)
+    public static LocalDate getLocalDate(int year, int month, int day)
     {
-        LocalDate day25 = LocalDate.of(currentDate.getYear(), currentDate.getMonth(), dayNumber);
-        DayOfWeek day = day25.getDayOfWeek();
+        return LocalDate.of(year, month, day);
+    }
+
+    // If the day falls on a weekend, return date of first workday after weekend
+    public static LocalDate getFirstWorkDayAtOrAfterDayInMonth(LocalDate inputDate)
+    {
+        DayOfWeek day = inputDate.getDayOfWeek();
         
         switch (day) {
             case DayOfWeek.SUNDAY:
-            	return day25.plusDays(1);
+            	return inputDate.plusDays(1);
             case DayOfWeek.SATURDAY:
-            	return day25.plusDays(2);
+            	return inputDate.plusDays(2);
             default:
-                return day25;
+                return inputDate;
         }
     }
     
-    public static LocalDate getEndOfNextWeek(LocalDate currentDate)
+    public static LocalDate getEndOfNextWeek(LocalDate inputDate)
     {
-		switch (currentDate.getDayOfWeek()) {
+		switch (inputDate.getDayOfWeek()) {
 			case DayOfWeek.SUNDAY:
-            	return currentDate.plusDays(7);
+            	return inputDate.plusDays(7);
             case DayOfWeek.SATURDAY:
-            	return currentDate.plusDays(8);
+            	return inputDate.plusDays(8);
             case DayOfWeek.FRIDAY:
-            	return currentDate.plusDays(9);
+            	return inputDate.plusDays(9);
             case DayOfWeek.THURSDAY:
-            	return currentDate.plusDays(10);
+            	return inputDate.plusDays(10);
             case DayOfWeek.WEDNESDAY:
-            	return currentDate.plusDays(11);
+            	return inputDate.plusDays(11);
             case DayOfWeek.TUESDAY:
-            	return currentDate.plusDays(12);
+            	return inputDate.plusDays(12);
             case DayOfWeek.MONDAY:
-            	return currentDate.plusDays(13);
+            	return inputDate.plusDays(13);
 		}
 	}
     
     // If the day falls on a weekend, return date of first workday prior to weekend
-    public static LocalDate getFirstWorkDayAtOrBeforeDayInMonth(LocalDate currentDate, int dayNumber)
+    public static LocalDate getFirstWorkDayAtOrBeforeDayInMonth(LocalDate inputDate)
     {
-        LocalDate day25 = LocalDate.of(currentDate.getYear(), currentDate.getMonth(), dayNumber);
-        DayOfWeek day = day25.getDayOfWeek();
+        DayOfWeek day = inputDate.getDayOfWeek();
         
         switch (day) {
             case DayOfWeek.SUNDAY:
-            	return day25.minusDays(2);
+            	return inputDate.minusDays(2);
             case DayOfWeek.SATURDAY:
-            	return day25.minusDays(1);
+            	return inputDate.minusDays(1);
             default:
-                return day25;
+                return inputDate;
         }
     }
 	
-	public static LocalDate getTaskDateIfTaskNeedsToBeCreated(DayOfWeek start, boolean before, int day)
-	{			
-		LocalDate currentDate = LocalDate.now();
-		LocalDate endOfNextWeek = getEndOfNextWeek(currentDate);
-        Month currentMonth = currentDate.getMonth();
+	public static LocalDate getTaskDateIfTaskNeedsToBeCreated(boolean before, int day)
+    {
+        LocalDate inputDate = LocalDate.now();
+
+        return getTaskDateIfTaskNeedsToBeCreated(before, day, inputDate);
+    }
+    public static LocalDate getTaskDateIfTaskNeedsToBeCreated(boolean before, int day, LocalDate inputDate)
+	{
+		LocalDate endOfNextWeek = getEndOfNextWeek(inputDate);
+        Month currentMonth = inputDate.getMonth();
         Month nextMonth = endOfNextWeek.getMonth();
         
         if (currentMonth != nextMonth) {
@@ -70,16 +77,16 @@ public class DateHelper
             months[0] = currentMonth;
             months[1] = nextMonth;
 
-            return getTaskDateIfTaskNeedsToBeCreated(start, before, day, months);
+            return getTaskDateIfTaskNeedsToBeCreated(before, day, months, inputDate);
         }
         else {
-            return getTaskDateIfTaskNeedsToBeCreated(start, before, day, currentMonth);
+            return getTaskDateIfTaskNeedsToBeCreated(before, day, currentMonth, inputDate);
         }
     }
-	public static LocalDate getTaskDateIfTaskNeedsToBeCreated(DayOfWeek start, boolean before, int day, Month[] months)
+	public static LocalDate getTaskDateIfTaskNeedsToBeCreated(boolean before, int day, Month[] months, LocalDate inputDate)
 	{	
 		for (Month month : months) {
-			LocalDate date = getTaskDateIfTaskNeedsToBeCreated(start, before, day, month);
+			LocalDate date = getTaskDateIfTaskNeedsToBeCreated(before, day, month, inputDate);
 			
 			if (date != null) {
 				return date;
@@ -88,34 +95,28 @@ public class DateHelper
 		
 		return null;
 	}
-	public static LocalDate getTaskDateIfTaskNeedsToBeCreated(DayOfWeek start, boolean before, int day, Month month)
+	public static LocalDate getTaskDateIfTaskNeedsToBeCreated(boolean before, int day, Month month, LocalDate inputDate)
 	{
-		LocalDate currentDate = LocalDate.now();
 		LocalDate workDay = null;
-        
-		// Only on the specified day to ensure scheduling does not get messed up
-		if (currentDate.getDayOfWeek() == start) {
-		    LocalDate endOfNextWeek = getEndOfNextWeek(currentDate);
-		    boolean sameMonth = currentDate.getMonth() == endOfNextWeek.getMonth();
-		    boolean dayToCome = day >= currentDate.getDayOfMonth();
-		    boolean beforeNextWeek = (sameMonth && dayToCome && day <= endOfNextWeek.getDayOfMonth()) || (!sameMonth && day <= endOfNextWeek.getDayOfMonth());
+        LocalDate endOfNextWeek = getEndOfNextWeek(inputDate);
+        boolean sameMonth = inputDate.getMonth() == endOfNextWeek.getMonth();
+        boolean dayToCome = day >= inputDate.getDayOfMonth() || !sameMonth;
+        boolean beforeNextWeek = (sameMonth && dayToCome && day <= endOfNextWeek.getDayOfMonth()) || (!sameMonth && day <= endOfNextWeek.getDayOfMonth());
 
-		    // Only in the specified month
-		    if (currentDate.getMonth() == month || endOfNextWeek.getMonth() == month) {
-			// It's at or after today in the current month
-			if (dayToCome && beforeNextWeek) {
-				if (before) {
-					workDay = getFirstWorkDayAtOrBeforeDayInMonth(currentDate, day);
-				}
-				else {				
-					LocalDate toReturn = getFirstWorkDayAtOrAfterDayInMonth(currentDate, day);
+        // Only in the specified month
+        if (inputDate.getMonth() == month || endOfNextWeek.getMonth() == month) {
+            // It's at or after today in the current month
+            if (dayToCome && beforeNextWeek) {
+                if (before) {
+                    workDay = getFirstWorkDayAtOrBeforeDayInMonth(getFirstOccurenceOfDay(inputDate, day));
+                } else {
+                    LocalDate toReturn = getFirstWorkDayAtOrAfterDayInMonth(getFirstOccurenceOfDay(inputDate, day));
 
-					if (toReturn <= endOfNextWeek) {
-						workDay = toReturn;
-					}
-				}
-			}
-		}
+                    if (toReturn <= endOfNextWeek) {
+                        workDay = toReturn;
+                    }
+                }
+            }
         }
         
         return workDay;
@@ -123,30 +124,39 @@ public class DateHelper
     
     public static int getLastDayOfMonth()
     {
-        LocalDate currentDate = LocalDate.now();
-        LocalDate lastDay = currentDate.with(lastDayOfMonth());
-        
-        return lastDay.getDayOfMonth();
+        LocalDate inputDate = LocalDate.now();
+
+        return getLastDayOfMonth(inputDate);
+    }
+    public static int getLastDayOfMonth(LocalDate inputDate)
+    {
+        return inputDate.lengthOfMonth();
     }
     		
     public static LocalDate getFirstOccurenceOfDay(int day)
     {
         int currentDay = LocalDate.now().getDayOfMonth();
+
+        return getFirstOccurenceOfDay(day, currentDay);
+    }
+    public static LocalDate getFirstOccurenceOfDay(int day, LocalDate inputDate)
+    {
+        int dateDay = inputDate.getDayOfMonth();
         
         // Is today the day?
-        if (currentDay == day) {
-            return LocalDate.now();
+        if (dateDay == day) {
+            return inputDate;
         }
         // Did we pass it already this month?
-        else if (currentDay > day){
-            YearMonth month = YearMonth.from(LocalDate.now());
+        else if (dateDay > day){
+            YearMonth month = YearMonth.from(inputDate);
             LocalDate newDate = month.atDay(day);
             
             return newDate.plusMonths(1);
         }
         // It's still to come this month
         else {            
-            return LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), day);
+            return LocalDate.of(inputDate.getYear(), inputDate.getMonth(), day);
         }
     }
 }
